@@ -2,6 +2,28 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "office365_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "office365"
+    },
+    "office365_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "adaggarw@microsoft.com"
+    },
+    "dynamicsax_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "dynamicsax"
+    },
+    "dynamicsax_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "anush@intcontoso2ax7.onmicrosoft.com"
+    },
+    "dynamicsax_1_environment": {
+      "type": "string",
+      "metadata": {
+        "description": "Environment id"
+      }
+    },
     "azureblob_1_Connection_Name": {
       "type": "string",
       "defaultValue": "azureblob"
@@ -23,14 +45,6 @@
         "description": "Specify a valid primary/secondary storage account access key."
       }
     },
-    "office365_1_Connection_Name": {
-      "type": "string",
-      "defaultValue": "office365"
-    },
-    "office365_1_Connection_DisplayName": {
-      "type": "string",
-      "defaultValue": "adaggarw@microsoft.com"
-    },
     "keyvault_1_Connection_Name": {
       "type": "string",
       "defaultValue": "keyvault-1"
@@ -45,20 +59,6 @@
         "description": "Name of the vault"
       },
       "defaultValue": "SalesFeed-POC-KVault"
-    },
-    "dynamicsax_1_Connection_Name": {
-      "type": "string",
-      "defaultValue": "dynamicsax"
-    },
-    "dynamicsax_1_Connection_DisplayName": {
-      "type": "string",
-      "defaultValue": "anush@intcontoso2ax7.onmicrosoft.com"
-    },
-    "dynamicsax_1_environment": {
-      "type": "string",
-      "metadata": {
-        "description": "Environment id"
-      }
     },
     "LogicAppLocation": {
       "type": "string",
@@ -102,7 +102,31 @@
     "LogicAppName": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "SalesFeed_POC_E2E"
+      "defaultValue": "SalesFeed_V1"
+    },
+    "D365FOURL": {
+      "defaultValue": "cbesemanpu31intbd54708e76d4c401.cloudax.int.dynamics.com",
+      "type": "string"
+    },
+    "Email Id": {
+      "defaultValue": "aditya.aggarwal@microsoft.com",
+      "type": "string"
+    },
+    "Emarsys Endpoint": {
+      "defaultValue": "https://admin.scarabresearch.com/hapi/merchant/1D13C2EC4C9CBF11/sales-data/api?live=false",
+      "type": "string"
+    },
+    "Entity Name": {
+      "defaultValue": "testfeed",
+      "type": "string"
+    },
+    "Entity Package Name": {
+      "defaultValue": "testfeedOP",
+      "type": "string"
+    },
+    "Legal Entity": {
+      "defaultValue": "USRT",
+      "type": "string"
     }
   },
   "variables": {},
@@ -137,23 +161,23 @@
                   "runAfter": {}
                 },
                 "Get_ZIP_Package_URL": {
+                  "runAfter": {
+                    "Delay_2": [
+                      "Succeeded"
+                    ]
+                  },
                   "type": "ApiConnection",
                   "inputs": {
+                    "body": {
+                      "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
+                    },
                     "host": {
                       "connection": {
                         "name": "@parameters('$connections')['dynamicsax']['connectionId']"
                       }
                     },
                     "method": "post",
-                    "body": {
-                      "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
-                    },
                     "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExportedPackageUrl'))}"
-                  },
-                  "runAfter": {
-                    "Delay_2": [
-                      "Succeeded"
-                    ]
                   }
                 }
               },
@@ -165,20 +189,20 @@
               "else": {
                 "actions": {
                   "Get_Errors": {
+                    "runAfter": {},
                     "type": "ApiConnection",
                     "inputs": {
+                      "body": {
+                        "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
+                      },
                       "host": {
                         "connection": {
                           "name": "@parameters('$connections')['dynamicsax']['connectionId']"
                         }
                       },
                       "method": "post",
-                      "body": {
-                        "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
-                      },
                       "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExecutionErrors'))}"
-                    },
-                    "runAfter": {}
+                    }
                   },
                   "Send_an_email_(V2)": {
                     "type": "ApiConnection",
@@ -219,52 +243,24 @@
                 }
               }
             },
-            "Delay_3": {
-              "type": "Wait",
-              "inputs": {
-                "interval": {
-                  "count": 5,
-                  "unit": "Second"
-                }
-              },
-              "runAfter": {
-                "Export_the_data_to_a_Package": [
-                  "Succeeded"
-                ]
-              }
-            },
-            "Delay_4": {
-              "type": "Wait",
-              "inputs": {
-                "interval": {
-                  "count": 5,
-                  "unit": "Second"
-                }
-              },
-              "runAfter": {
-                "Extract_archive_to_folder": [
-                  "Succeeded"
-                ]
-              }
-            },
             "Export_the_data_to_a_Package": {
+              "runAfter": {},
               "type": "ApiConnection",
               "inputs": {
+                "body": {
+                  "definitionGroupId": "@parameters('Entity Name')",
+                  "legalEntityId": "@parameters('Entity ID')",
+                  "packageName": "@parameters('Entity Package Name')",
+                  "reExecute": false
+                },
                 "host": {
                   "connection": {
                     "name": "@parameters('$connections')['dynamicsax']['connectionId']"
                   }
                 },
                 "method": "post",
-                "body": {
-                  "definitionGroupId": "@parameters('Entity Name')",
-                  "packageName": "@parameters('Entity Package Name')",
-                  "reExecute": false,
-                  "legalEntityId": "@parameters('Entity ID')"
-                },
                 "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.ExportToPackage'))}"
-              },
-              "runAfter": {}
+              }
             },
             "Extract_archive_to_folder": {
               "type": "ApiConnection",
@@ -304,7 +300,7 @@
                 }
               },
               "runAfter": {
-                "Delay_4": [
+                "Extract_archive_to_folder": [
                   "Succeeded"
                 ]
               }
@@ -395,24 +391,24 @@
                   }
                 },
                 "Poll_till_data_export_in_process": {
+                  "runAfter": {},
                   "type": "ApiConnection",
                   "inputs": {
+                    "body": {
+                      "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
+                    },
                     "host": {
                       "connection": {
                         "name": "@parameters('$connections')['dynamicsax']['connectionId']"
                       }
                     },
                     "method": "post",
-                    "body": {
-                      "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
-                    },
                     "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExecutionSummaryStatus'))}"
-                  },
-                  "runAfter": {}
+                  }
                 }
               },
               "runAfter": {
-                "Delay_3": [
+                "Export_the_data_to_a_Package": [
                   "Succeeded"
                 ]
               }
@@ -427,20 +423,16 @@
               "defaultValue": "/feed/sales_data_file_sample03.csv",
               "type": "String"
             },
-            "EmailID_1": {
-              "defaultValue": "aditya.aggarwal@microsoft.com",
+            "D365FOURL": {
+              "defaultValue": "cbesemanpu31intbd54708e76d4c401.cloudax.int.dynamics.com",
               "type": "String"
             },
-            "EmailID_2": {
-              "defaultValue": " ",
+            "Email Id": {
+              "defaultValue": "aditya.aggarwal@microsoft.com",
               "type": "String"
             },
             "Emarsys Endpoint": {
               "defaultValue": "https://admin.scarabresearch.com/hapi/merchant/1D13C2EC4C9CBF11/sales-data/api?live=false",
-              "type": "String"
-            },
-            "Entity ID": {
-              "defaultValue": "USRT",
               "type": "String"
             },
             "Entity Name": {
@@ -451,8 +443,8 @@
               "defaultValue": "testfeedOP",
               "type": "String"
             },
-            "Resource": {
-              "defaultValue": "cbesemanpu31intbd54708e76d4c401.cloudax.int.dynamics.com",
+            "Legal Entity": {
+              "defaultValue": "USRT",
               "type": "String"
             }
           },
@@ -512,6 +504,33 @@
     {
       "type": "MICROSOFT.WEB/CONNECTIONS",
       "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('office365_1_Connection_Name')]",
+      "location": "eastus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'office365')]"
+        },
+        "displayName": "[parameters('office365_1_Connection_DisplayName')]"
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('dynamicsax_1_Connection_Name')]",
+      "location": "eastus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'dynamicsax')]"
+        },
+        "displayName": "[parameters('dynamicsax_1_Connection_DisplayName')]",
+        "nonSecretParameterValues": {
+          "environment": "[parameters('dynamicsax_1_environment')]"
+        }
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
       "name": "[parameters('azureblob_1_Connection_Name')]",
       "location": "eastus",
       "properties": {
@@ -528,18 +547,6 @@
     {
       "type": "MICROSOFT.WEB/CONNECTIONS",
       "apiVersion": "2018-07-01-preview",
-      "name": "[parameters('office365_1_Connection_Name')]",
-      "location": "eastus",
-      "properties": {
-        "api": {
-          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'office365')]"
-        },
-        "displayName": "[parameters('office365_1_Connection_DisplayName')]"
-      }
-    },
-    {
-      "type": "MICROSOFT.WEB/CONNECTIONS",
-      "apiVersion": "2018-07-01-preview",
       "name": "[parameters('keyvault_1_Connection_Name')]",
       "location": "eastus",
       "properties": {
@@ -549,21 +556,6 @@
         "displayName": "[parameters('keyvault_1_Connection_DisplayName')]",
         "nonSecretParameterValues": {
           "vaultName": "[parameters('keyvault_1_vaultName')]"
-        }
-      }
-    },
-    {
-      "type": "MICROSOFT.WEB/CONNECTIONS",
-      "apiVersion": "2018-07-01-preview",
-      "name": "[parameters('dynamicsax_1_Connection_Name')]",
-      "location": "eastus",
-      "properties": {
-        "api": {
-          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'dynamicsax')]"
-        },
-        "displayName": "[parameters('dynamicsax_1_Connection_DisplayName')]",
-        "nonSecretParameterValues": {
-          "environment": "[parameters('dynamicsax_1_environment')]"
         }
       }
     }
