@@ -1,19 +1,70 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
   "parameters": {
-    "logicAppName": {
+    "azureblob_1_Connection_Name": {
       "type": "string",
-      "minLength": 1,
-      "maxLength": 80,
+      "defaultValue": "azureblob"
+    },
+    "azureblob_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "testfeed"
+    },
+    "azureblob_1_accountName": {
+      "type": "string",
       "metadata": {
-        "description": "Name of the Logic App."
+        "description": "Name of the storage account the connector should use."
+      },
+      "defaultValue": "testfeed01"
+    },
+    "azureblob_1_accessKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Specify a valid primary/secondary storage account access key."
       }
     },
-    "logicAppLocation": {
+    "office365_1_Connection_Name": {
       "type": "string",
-      "defaultValue": "[resourceGroup().location]",
+      "defaultValue": "office365"
+    },
+    "office365_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "adaggarw@microsoft.com"
+    },
+    "keyvault_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "keyvault-1"
+    },
+    "keyvault_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "adaggarw@microsoft.com"
+    },
+    "keyvault_1_vaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the vault"
+      },
+      "defaultValue": "SalesFeed-POC-KVault"
+    },
+    "dynamicsax_1_Connection_Name": {
+      "type": "string",
+      "defaultValue": "dynamicsax"
+    },
+    "dynamicsax_1_Connection_DisplayName": {
+      "type": "string",
+      "defaultValue": "anush@intcontoso2ax7.onmicrosoft.com"
+    },
+    "dynamicsax_1_environment": {
+      "type": "string",
+      "metadata": {
+        "description": "Environment id"
+      }
+    },
+    "LogicAppLocation": {
+      "type": "string",
+      "minLength": 1,
       "allowedValues": [
+        "[resourceGroup().location]",
         "eastasia",
         "southeastasia",
         "centralus",
@@ -34,431 +85,488 @@
         "westindia",
         "canadacentral",
         "canadaeast",
+        "uksouth",
+        "ukwest",
         "westcentralus",
         "westus2",
-        "[resourceGroup().location]"
+        "koreacentral",
+        "koreasouth",
+        "francecentral",
+        "francesouth",
+        "uaecentral",
+        "southafricanorth",
+        "southafricawest"
       ],
-      "metadata": {
-        "description": "Location of the Logic App."
-      }
+      "defaultValue": "eastus"
     },
-    "dynamicsax_Connection_Name": {
+    "LogicAppName": {
       "type": "string",
-      "defaultValue": "dynamicsax"
-    },
-    "dynamicsax_Connection_DisplayName": {
-      "type": "string",
-      "defaultValue": "user@domain.com"
-    },
-    "Resource": {
-      "type": "string",
-      "metadata": {
-        "description": "F&o instance "
-      }
-    },
-    "LegalEntity": {
-      "type": "string",
-      "metadata": {
-        "description": "Legal entity from which data is going to be exported from"
-      }
-    },
-    "Entity Name": {
-      "type": "string",
-      "metadata": {
-        "description": "Entity Name"
-      }
-    },
-    "EmailID_1": {
-      "type": "string",
-      "metadata": {
-        "description": "email id"
-      }
-    },
-    "workflows_SalesFeed_POC_E2E_name": {
-      "defaultValue": "SalesFeed_POC_E2E",
-      "type": "String"
-    },
-    "connections_azureblob_externalid": {
-      "defaultValue": "/subscriptions/0b5e709c-ca05-400e-bff9-1214086e1944/resourceGroups/TestDemo/providers/Microsoft.Web/connections/azureblob",
-      "type": "String"
-    },
-    "connections_dynamicsax_externalid": {
-      "defaultValue": "/subscriptions/0b5e709c-ca05-400e-bff9-1214086e1944/resourceGroups/TestDemo/providers/Microsoft.Web/connections/dynamicsax",
-      "type": "String"
-    },
-    "connections_office365_externalid": {
-      "defaultValue": "/subscriptions/0b5e709c-ca05-400e-bff9-1214086e1944/resourceGroups/TestDemo/providers/Microsoft.Web/connections/office365",
-      "type": "String"
+      "minLength": 1,
+      "defaultValue": "SalesFeed_POC_E2E"
     }
   },
-    "variables": {},
-    "resources": [
-        {
-            "type": "Microsoft.Logic/workflows",
-            "apiVersion": "2017-07-01",
-            "name": "[parameters('workflows_SalesFeed_POC_E2E_name')]",
-            "location": "eastus",
-            "properties": {
-                "state": "Enabled",
-                "definition": {
-                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-                    "contentVersion": "1.0.0.0",
-                  "parameters": {
-                    "$connections": {
-                      "defaultValue": {},
-                      "type": "Object"
-                    },
-                    "Blob CSV Content Path": {
-                      "defaultValue": "/feed/sales_data_file_sample03.csv",
-                      "type": "String"
-                    },
-                    "EmailID_1": {
-                      "defaultValue": " ",
-                      "type": "String"
-                    },
-                    "EmailID_2": {
-                      "defaultValue": " ",
-                      "type": "String"
-                    },
-                    "Emarsys Bearer token": {
-                      "defaultValue": "Bearer uBrdoDSq9Es2iZVJHlVysTh_ocv032Xh8BU6bclkX36F2R8lc3P2H6k0tvNqR7FOOZL8zi_HHUVSe6kB2NIyGw",
-                      "type": "String"
-                    },
-                    "Emarsys Endpoint": {
-                      "defaultValue": "https://admin.scarabresearch.com/hapi/merchant/1D13C2EC4C9CBF11/sales-data/api?live=false",
-                      "type": "String"
-                    },
-                    "LegalEntity": {
-                      "defaultValue": "USRT",
-                      "type": "String"
-                    },
-                    "Entity Name": {
-                      "defaultValue": "testfeed",
-                      "type": "String"
-                    },
-                    "Entity Package Name": {
-                      "defaultValue": "testfeedOP",
-                      "type": "String"
-                    },
-                    "Resource": {
-                      "defaultValue": "cbesemanpu31intbd54708e76d4c401.cloudax.int.dynamics.com",
-                      "type": "String"
+  "variables": {},
+  "resources": [
+    {
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "Condition": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@body('Poll_till_data_export_in_process')?['OutputParameters']?['value']",
+                      "Succeeded"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Delay_2": {
+                  "type": "Wait",
+                  "inputs": {
+                    "interval": {
+                      "count": 5,
+                      "unit": "Second"
                     }
                   },
-                    "triggers": {
-                        "Recurrence": {
-                            "recurrence": {
-                                "frequency": "Day",
-                                "interval": 1
-                            },
-                            "type": "Recurrence"
-                        }
-                    },
-                    "actions": {
-                        "Condition": {
-                            "actions": {
-                                "Delay_2": {
-                                    "runAfter": {},
-                                    "type": "Wait",
-                                    "inputs": {
-                                        "interval": {
-                                            "count": 5,
-                                            "unit": "Second"
-                                        }
-                                    }
-                                },
-                                "Get_ZIP_Package_URL": {
-                                    "runAfter": {
-                                        "Delay_2": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "ApiConnection",
-                                    "inputs": {
-                                        "body": {
-                                            "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
-                                        },
-                                        "host": {
-                                            "connection": {
-                                                "name": "@parameters('$connections')['dynamicsax']['connectionId']"
-                                            }
-                                        },
-                                        "method": "post",
-                                        "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExportedPackageUrl'))}"
-                                    }
-                                }
-                            },
-                            "runAfter": {
-                                "Until": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "else": {
-                                "actions": {
-                                    "Get_Errors": {
-                                        "runAfter": {},
-                                        "type": "ApiConnection",
-                                        "inputs": {
-                                            "body": {
-                                                "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
-                                            },
-                                            "host": {
-                                                "connection": {
-                                                    "name": "@parameters('$connections')['dynamicsax']['connectionId']"
-                                                }
-                                            },
-                                            "method": "post",
-                                            "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExecutionErrors'))}"
-                                        }
-                                    },
-                                    "Send_an_email_(V2)": {
-                                        "runAfter": {
-                                            "Get_Errors": [
-                                                "Succeeded"
-                                            ]
-                                        },
-                                        "type": "ApiConnection",
-                                        "inputs": {
-                                            "body": {
-                                                "Body": "<p>Error in exporting the sales data to a package :@{body('Get_Errors')?['OutputParameters']?['value']}<br>\n@{body('Poll_till_data_export_in_process')?['OutputParameters']?['value']}</p>",
-                                                "Subject": "[[Sales Feed Execution Error]",
-                                                "To": "@{parameters('EmailID_1')},@{parameters('EmailID_2')}"
-                                            },
-                                            "host": {
-                                                "connection": {
-                                                    "name": "@parameters('$connections')['office365']['connectionId']"
-                                                }
-                                            },
-                                            "method": "post",
-                                            "path": "/v2/Mail"
-                                        }
-                                    },
-                                    "Terminate": {
-                                        "runAfter": {
-                                            "Send_an_email_(V2)": [
-                                                "Succeeded"
-                                            ]
-                                        },
-                                        "type": "Terminate",
-                                        "inputs": {
-                                            "runError": {
-                                                "message": "Error in exporting the data package \n@{body('Poll_till_data_export_in_process')?['OutputParameters']?['value']}"
-                                            },
-                                            "runStatus": "Failed"
-                                        }
-                                    }
-                                }
-                            },
-                            "expression": {
-                                "and": [
-                                    {
-                                        "equals": [
-                                            "@body('Poll_till_data_export_in_process')?['OutputParameters']?['value']",
-                                            "Succeeded"
-                                        ]
-                                    }
-                                ]
-                            },
-                            "type": "If"
-                        },
-                        "Delay_3": {
-                            "runAfter": {
-                                "Export_the_data_to_a_Package": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Wait",
-                            "inputs": {
-                                "interval": {
-                                    "count": 5,
-                                    "unit": "Second"
-                                }
-                            }
-                        },
-                        "Delay_4": {
-                            "runAfter": {
-                                "Extract_archive_to_folder": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Wait",
-                            "inputs": {
-                                "interval": {
-                                    "count": 5,
-                                    "unit": "Second"
-                                }
-                            }
-                        },
-                        "Export_the_data_to_a_Package": {
-                            "runAfter": {},
-                            "type": "ApiConnection",
-                            "inputs": {
-                              "body": {
-                                "definitionGroupId": "@parameters('Entity Name')",
-                                "legalEntityId": "@parameters('LegalEntity')",
-                                "packageName": "@parameters('Entity Package Name')",
-                                "reExecute": false
-                              },
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['dynamicsax']['connectionId']"
-                                    }
-                                },
-                                "method": "post",
-                                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.ExportToPackage'))}"
-                            }
-                        },
-                        "Extract_archive_to_folder": {
-                            "runAfter": {
-                                "Condition": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
-                                    }
-                                },
-                                "method": "post",
-                                "path": "/datasets/default/extractFolderV2",
-                                "queries": {
-                                    "destination": "/feed",
-                                    "overwrite": true,
-                                    "queryParametersSingleEncoded": true,
-                                    "source": "@body('Get_ZIP_Package_URL')?['OutputParameters']?['value']"
-                                }
-                            }
-                        },
-                        "Get_blob_content": {
-                            "runAfter": {
-                                "Delay_4": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
-                                    }
-                                },
-                                "method": "get",
-                                "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent(parameters('Blob CSV Content Path')))}/content",
-                                "queries": {
-                                    "inferContentType": true
-                                }
-                            }
-                        },
-                        "HTTP": {
-                            "runAfter": {
-                                "Get_blob_content": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "Http",
-                            "inputs": {
-                                "body": "@body('Get_blob_content')",
-                                "headers": {
-                                    "Authorization": "@parameters('Emarsys Bearer token')"
-                                },
-                                "method": "POST",
-                                "uri": "@parameters('Emarsys Endpoint')"
-                            }
-                        },
-                        "Send_an_email_(V2)_2": {
-                            "runAfter": {
-                                "HTTP": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "type": "ApiConnection",
-                            "inputs": {
-                                "body": {
-                                    "Body": "<p>HTTP request to hit Emarsys API returned with status: @{outputs('HTTP')['statusCode']}</p>",
-                                    "Subject": "[[Sales Feed Status]",
-                                    "To": "@parameters('EmailID_1')"
-                                },
-                                "host": {
-                                    "connection": {
-                                        "name": "@parameters('$connections')['office365']['connectionId']"
-                                    }
-                                },
-                                "method": "post",
-                                "path": "/v2/Mail"
-                            }
-                        },
-                        "Until": {
-                            "actions": {
-                                "Delay": {
-                                    "runAfter": {
-                                        "Poll_till_data_export_in_process": [
-                                            "Succeeded"
-                                        ]
-                                    },
-                                    "type": "Wait",
-                                    "inputs": {
-                                        "interval": {
-                                            "count": 5,
-                                            "unit": "Second"
-                                        }
-                                    }
-                                },
-                                "Poll_till_data_export_in_process": {
-                                    "runAfter": {},
-                                    "type": "ApiConnection",
-                                    "inputs": {
-                                        "body": {
-                                            "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
-                                        },
-                                        "host": {
-                                            "connection": {
-                                                "name": "@parameters('$connections')['dynamicsax']['connectionId']"
-                                            }
-                                        },
-                                        "method": "post",
-                                        "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExecutionSummaryStatus'))}"
-                                    }
-                                }
-                            },
-                            "runAfter": {
-                                "Delay_3": [
-                                    "Succeeded"
-                                ]
-                            },
-                            "expression": "@not(contains(body('Poll_till_data_export_in_process')?['OutputParameters']?['value'], 'Executing'))",
-                            "limit": {
-                                "count": 60,
-                                "timeout": "PT1H"
-                            },
-                            "type": "Until"
-                        }
-                    },
-                    "outputs": {}
+                  "runAfter": {}
                 },
-                "parameters": {
-                    "$connections": {
-                        "value": {
-                            "azureblob": {
-                                "connectionId": "[parameters('connections_azureblob_externalid')]",
-                                "connectionName": "azureblob",
-                                "id": "/subscriptions/0b5e709c-ca05-400e-bff9-1214086e1944/providers/Microsoft.Web/locations/eastus/managedApis/azureblob"
-                            },
-                            "dynamicsax": {
-                                "connectionId": "[parameters('connections_dynamicsax_externalid')]",
-                                "connectionName": "dynamicsax",
-                                "id": "/subscriptions/0b5e709c-ca05-400e-bff9-1214086e1944/providers/Microsoft.Web/locations/eastus/managedApis/dynamicsax"
-                            },
-                            "office365": {
-                                "connectionId": "[parameters('connections_office365_externalid')]",
-                                "connectionName": "office365",
-                                "id": "/subscriptions/0b5e709c-ca05-400e-bff9-1214086e1944/providers/Microsoft.Web/locations/eastus/managedApis/office365"
-                            }
-                        }
-                    }
+                "Get_ZIP_Package_URL": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['dynamicsax']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "body": {
+                      "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
+                    },
+                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExportedPackageUrl'))}"
+                  },
+                  "runAfter": {
+                    "Delay_2": [
+                      "Succeeded"
+                    ]
+                  }
                 }
+              },
+              "runAfter": {
+                "Until": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Get_Errors": {
+                    "type": "ApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connection": {
+                          "name": "@parameters('$connections')['dynamicsax']['connectionId']"
+                        }
+                      },
+                      "method": "post",
+                      "body": {
+                        "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
+                      },
+                      "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExecutionErrors'))}"
+                    },
+                    "runAfter": {}
+                  },
+                  "Send_an_email_(V2)": {
+                    "type": "ApiConnection",
+                    "inputs": {
+                      "host": {
+                        "connection": {
+                          "name": "@parameters('$connections')['office365']['connectionId']"
+                        }
+                      },
+                      "method": "post",
+                      "body": {
+                        "To": "@{parameters('EmailID_1')},@{parameters('EmailID_2')}",
+                        "Subject": "[Sales Feed Execution Error]",
+                        "Body": "<p>Error in exporting the sales data to a package :@{body('Get_Errors')?['OutputParameters']?['value']}<br>\n@{body('Poll_till_data_export_in_process')?['OutputParameters']?['value']}</p>"
+                      },
+                      "path": "/v2/Mail"
+                    },
+                    "runAfter": {
+                      "Get_Errors": [
+                        "Succeeded"
+                      ]
+                    }
+                  },
+                  "Terminate": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Failed",
+                      "runError": {
+                        "message": "Error in exporting the data package \n@{body('Poll_till_data_export_in_process')?['OutputParameters']?['value']}"
+                      }
+                    },
+                    "runAfter": {
+                      "Send_an_email_(V2)": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "Delay_3": {
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 5,
+                  "unit": "Second"
+                }
+              },
+              "runAfter": {
+                "Export_the_data_to_a_Package": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Delay_4": {
+              "type": "Wait",
+              "inputs": {
+                "interval": {
+                  "count": 5,
+                  "unit": "Second"
+                }
+              },
+              "runAfter": {
+                "Extract_archive_to_folder": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Export_the_data_to_a_Package": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['dynamicsax']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "body": {
+                  "definitionGroupId": "@parameters('Entity Name')",
+                  "packageName": "@parameters('Entity Package Name')",
+                  "reExecute": false,
+                  "legalEntityId": "@parameters('Entity ID')"
+                },
+                "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.ExportToPackage'))}"
+              },
+              "runAfter": {}
+            },
+            "Extract_archive_to_folder": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azureblob']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "path": "/datasets/default/extractFolderV2",
+                "queries": {
+                  "source": "@body('Get_ZIP_Package_URL')?['OutputParameters']?['value']",
+                  "destination": "/feed",
+                  "overwrite": true,
+                  "queryParametersSingleEncoded": true
+                }
+              },
+              "runAfter": {
+                "Condition": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_blob_content": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azureblob']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent(parameters('Blob CSV Content Path')))}/content",
+                "queries": {
+                  "inferContentType": true
+                }
+              },
+              "runAfter": {
+                "Delay_4": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Get_secret": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['keyvault']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/secrets/@{encodeURIComponent('MSFT-demo-BearerT')}/value"
+              },
+              "runAfter": {
+                "Get_blob_content": [
+                  "Succeeded"
+                ]
+              },
+              "runtimeConfiguration": {
+                "secureData": {
+                  "properties": [
+                    "inputs",
+                    "outputs"
+                  ]
+                }
+              }
+            },
+            "HTTP": {
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "@parameters('Emarsys Endpoint')",
+                "headers": {
+                  "Authorization": "@body('Get_secret')?['value']"
+                },
+                "body": "@body('Get_blob_content')"
+              },
+              "runAfter": {
+                "Get_secret": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Send_an_email_(V2)_2": {
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['office365']['connectionId']"
+                  }
+                },
+                "method": "post",
+                "body": {
+                  "To": "@parameters('EmailID_1')",
+                  "Subject": "[Sales Feed Status]",
+                  "Body": "<p>HTTP request to hit Emarsys API returned with status: @{outputs('HTTP')['statusCode']}</p>"
+                },
+                "path": "/v2/Mail"
+              },
+              "runAfter": {
+                "HTTP": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "Until": {
+              "type": "Until",
+              "expression": "@not(contains(body('Poll_till_data_export_in_process')?['OutputParameters']?['value'], 'Executing'))",
+              "limit": {
+                "count": 60,
+                "timeout": "PT1H"
+              },
+              "actions": {
+                "Delay": {
+                  "type": "Wait",
+                  "inputs": {
+                    "interval": {
+                      "count": 5,
+                      "unit": "Second"
+                    }
+                  },
+                  "runAfter": {
+                    "Poll_till_data_export_in_process": [
+                      "Succeeded"
+                    ]
+                  }
+                },
+                "Poll_till_data_export_in_process": {
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['dynamicsax']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "body": {
+                      "executionId": "@body('Export_the_data_to_a_Package')?['OutputParameters']?['value']"
+                    },
+                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent(parameters('Resource')))}/procedures/@{encodeURIComponent(encodeURIComponent('DataManagementDefinitionGroups/Microsoft.Dynamics.DataEntities.GetExecutionSummaryStatus'))}"
+                  },
+                  "runAfter": {}
+                }
+              },
+              "runAfter": {
+                "Delay_3": [
+                  "Succeeded"
+                ]
+              }
             }
+          },
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
+            "Blob CSV Content Path": {
+              "defaultValue": "/feed/sales_data_file_sample03.csv",
+              "type": "String"
+            },
+            "EmailID_1": {
+              "defaultValue": "aditya.aggarwal@microsoft.com",
+              "type": "String"
+            },
+            "EmailID_2": {
+              "defaultValue": " ",
+              "type": "String"
+            },
+            "Emarsys Endpoint": {
+              "defaultValue": "https://admin.scarabresearch.com/hapi/merchant/1D13C2EC4C9CBF11/sales-data/api?live=false",
+              "type": "String"
+            },
+            "Entity ID": {
+              "defaultValue": "USRT",
+              "type": "String"
+            },
+            "Entity Name": {
+              "defaultValue": "testfeed",
+              "type": "String"
+            },
+            "Entity Package Name": {
+              "defaultValue": "testfeedOP",
+              "type": "String"
+            },
+            "Resource": {
+              "defaultValue": "cbesemanpu31intbd54708e76d4c401.cloudax.int.dynamics.com",
+              "type": "String"
+            }
+          },
+          "triggers": {
+            "Recurrence": {
+              "type": "Recurrence",
+              "recurrence": {
+                "frequency": "Day",
+                "interval": 1
+              }
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "dynamicsax": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'dynamicsax')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('dynamicsax_1_Connection_Name'))]",
+                "connectionName": "[parameters('dynamicsax_1_Connection_Name')]"
+              },
+              "office365": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'office365')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('office365_1_Connection_Name'))]",
+                "connectionName": "[parameters('office365_1_Connection_Name')]"
+              },
+              "azureblob": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'azureblob')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('azureblob_1_Connection_Name'))]",
+                "connectionName": "[parameters('azureblob_1_Connection_Name')]"
+              },
+              "keyvault": {
+                "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'keyvault')]",
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('keyvault_1_Connection_Name'))]",
+                "connectionName": "[parameters('keyvault_1_Connection_Name')]"
+              }
+            }
+          }
         }
-    ]
+      },
+      "name": "[parameters('LogicAppName')]",
+      "type": "Microsoft.Logic/workflows",
+      "location": "[parameters('LogicAppLocation')]",
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "apiVersion": "2016-06-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/connections', parameters('dynamicsax_1_Connection_Name'))]",
+        "[resourceId('Microsoft.Web/connections', parameters('office365_1_Connection_Name'))]",
+        "[resourceId('Microsoft.Web/connections', parameters('azureblob_1_Connection_Name'))]",
+        "[resourceId('Microsoft.Web/connections', parameters('keyvault_1_Connection_Name'))]"
+      ]
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('azureblob_1_Connection_Name')]",
+      "location": "eastus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'azureblob')]"
+        },
+        "displayName": "[parameters('azureblob_1_Connection_DisplayName')]",
+        "parameterValues": {
+          "accountName": "[parameters('azureblob_1_accountName')]",
+          "accessKey": "[parameters('azureblob_1_accessKey')]"
+        }
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('office365_1_Connection_Name')]",
+      "location": "eastus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'office365')]"
+        },
+        "displayName": "[parameters('office365_1_Connection_DisplayName')]"
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('keyvault_1_Connection_Name')]",
+      "location": "eastus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'keyvault')]"
+        },
+        "displayName": "[parameters('keyvault_1_Connection_DisplayName')]",
+        "nonSecretParameterValues": {
+          "vaultName": "[parameters('keyvault_1_vaultName')]"
+        }
+      }
+    },
+    {
+      "type": "MICROSOFT.WEB/CONNECTIONS",
+      "apiVersion": "2018-07-01-preview",
+      "name": "[parameters('dynamicsax_1_Connection_Name')]",
+      "location": "eastus",
+      "properties": {
+        "api": {
+          "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'dynamicsax')]"
+        },
+        "displayName": "[parameters('dynamicsax_1_Connection_DisplayName')]",
+        "nonSecretParameterValues": {
+          "environment": "[parameters('dynamicsax_1_environment')]"
+        }
+      }
+    }
+  ],
+  "outputs": {}
 }
