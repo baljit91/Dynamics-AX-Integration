@@ -105,7 +105,6 @@
       "defaultValue": "SalesFeed_V1"
     },
     "D365FOURL": {
-      "defaultValue": "cbesemanpu31intbd54708e76d4c401.cloudax.int.dynamics.com",
       "type": "string"
     },
     "Email Id": {
