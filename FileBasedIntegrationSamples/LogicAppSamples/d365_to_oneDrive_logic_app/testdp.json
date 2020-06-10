@@ -8,7 +8,7 @@
     },
     "office365_1_Connection_DisplayName": {
       "type": "string",
-      "defaultValue": "user@domain.com"
+      "defaultValue": "adaggarw@microsoft.com"
     },
     "dynamicsax_1_Connection_Name": {
       "type": "string",
@@ -17,6 +17,12 @@
     "dynamicsax_1_Connection_DisplayName": {
       "type": "string",
       "defaultValue": "user@domain.com"
+    },
+    "dynamicsax_1_environment": {
+      "type": "string",
+      "metadata": {
+        "description": "Environment id"
+      }
     },
     "azureblob_1_Connection_Name": {
       "type": "string",
@@ -118,6 +124,7 @@
       "type": "string"
     },
     "Legal Entity": {
+      "defaultValue": "USRT",
       "type": "string"
     }
   },
@@ -515,6 +522,9 @@
           "id": "[concat(subscription().id, '/providers/Microsoft.Web/locations/', 'eastus', '/managedApis/', 'dynamicsax')]"
         },
         "displayName": "[parameters('dynamicsax_1_Connection_DisplayName')]",
+        "nonSecretParameterValues": {
+          "environment": "[parameters('dynamicsax_1_environment')]"
+        }
       }
     },
     {
